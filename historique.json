@@ -1,0 +1,15 @@
+[
+  {
+    "date": "04/05/2026 20:48",
+    "messages": [
+      {
+        "role": "user",
+        "content": "bonjour"
+      },
+      {
+        "role": "assistant",
+        "content": "**Bonjour !**\n\nEnchanté ! Comment allez-vous aujourd'hui ? Qu'est-ce que je peux faire pour vous aider ? N'hésitez pas à me poser une question ou à partager vos préoccupations. Je suis là pour vous aider et vous fournir des informations utiles. \n\n**Que puis-je faire pour vous aujourd'hui ?**"
+      }
+    ]
+  }
+]
