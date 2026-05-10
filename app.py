@@ -8,8 +8,7 @@ import openpyxl
 app = Flask(__name__)
 
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-2.0-flash")
-
+model = genai.GenerativeModel("gemini-2.0-flash-lite")
 SYSTEM_PROMPT = """Tu es Zina IA, un assistant professionnel et formel.
 Tu réponds toujours de manière claire, précise et structurée.
 Tu utilises le français par défaut."""
