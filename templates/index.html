@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link rel="manifest" href="/manifest.json">
   <title>Zina IA</title>
+  <link rel="manifest" href="/manifest.json">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
@@ -27,7 +27,12 @@
     .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
     .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes bounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-6px); opacity: 1; } }
-    #input-area { padding: 14px 16px; border-top: 1px solid #eee; background: #fafafa; display: flex; gap: 10px; align-items: flex-end; }
+    #input-area { padding: 14px 16px; border-top: 1px solid #eee; background: #fafafa; display: flex; flex-direction: column; gap: 8px; }
+    #file-preview { display: none; background: #e8f0fe; padding: 8px 12px; border-radius: 8px; font-size: 13px; color: #1A6FD4; }
+    #input-row { display: flex; gap: 10px; align-items: flex-end; }
+    #upload-btn { width: 42px; height: 42px; border-radius: 50%; background: #f0f0f0; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
+    #upload-btn:hover { background: #e0e0e0; }
+    #file-input { display: none; }
     #user-input { flex: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 24px; font-size: 14px; font-family: inherit; resize: none; outline: none; min-height: 42px; max-height: 120px; }
     #user-input:focus { border-color: #1A6FD4; }
     #send-btn { width: 42px; height: 42px; border-radius: 50%; background: #1A6FD4; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -35,12 +40,13 @@
     #send-btn:disabled { background: #ccc; cursor: not-allowed; }
     #send-btn svg { width: 18px; height: 18px; fill: white; }
     .sys-msg { text-align: center; font-size: 12px; color: #aaa; }
+    .msg img { max-width: 200px; border-radius: 8px; margin-top: 6px; }
   </style>
 </head>
 <body>
 <div id="chat-container">
   <div id="header">
-    <div style="background:none;padding:0;">
+    <div>
       <svg width="40" height="40" viewBox="0 0 100 100">
         <defs><linearGradient id="g" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#FFE066"/><stop offset="100%" style="stop-color:#B8860B"/></linearGradient></defs>
         <rect width="100" height="100" rx="12" fill="#0D0D1A"/>
@@ -49,21 +55,26 @@
     </div>
     <div>
       <div class="title">Zina IA</div>
-      <div class="subtitle">Ton assistant personnel</div>
+      <div class="subtitle">Votre assistante professionnelle</div>
     </div>
   </div>
   <div id="messages">
     <div class="sys-msg">— Début de la conversation —</div>
     <div class="msg bot">
       <div class="msg-avatar">AI</div>
-      <div class="bubble">Bonjour ! Je suis Zina IA, ton assistant personnel. Comment puis-je t'aider aujourd'hui ? 👋</div>
+      <div class="bubble">Bonjour ! Je suis Zina IA, votre assistante professionnelle. Comment puis-je vous aider aujourd'hui ? 👋</div>
     </div>
   </div>
   <div id="input-area">
-    <textarea id="user-input" placeholder="Écris ton message..." rows="1"></textarea>
-    <button id="send-btn">
-      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-    </button>
+    <div id="file-preview">📎 <span id="file-name"></span> <button onclick="clearFile()" style="background:none;border:none;cursor:pointer;color:red;">✕</button></div>
+    <div id="input-row">
+      <button id="upload-btn" onclick="document.getElementById('file-input').click()">📎</button>
+      <input type="file" id="file-input" accept="image/*,.pdf,.docx,.xlsx" onchange="handleFile(this)"/>
+      <textarea id="user-input" placeholder="Écrivez votre message..." rows="1"></textarea>
+      <button id="send-btn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
   </div>
 </div>
 <script>
@@ -71,20 +82,50 @@
   const inputEl = document.getElementById('user-input');
   const sendBtn = document.getElementById('send-btn');
   const history = [];
-  function addMessage(role, text) {
+  let currentFile = null;
+  let currentFileType = null;
+
+  function handleFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      currentFile = e.target.result.split(',')[1];
+      currentFileType = file.type;
+      document.getElementById('file-name').textContent = file.name;
+      document.getElementById('file-preview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearFile() {
+    currentFile = null;
+    currentFileType = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('file-preview').style.display = 'none';
+  }
+
+  function addMessage(role, text, imageData) {
     const wrap = document.createElement('div');
     wrap.className = 'msg ' + (role === 'user' ? 'user' : 'bot');
     const av = document.createElement('div');
     av.className = 'msg-avatar';
-    av.textContent = role === 'user' ? 'Toi' : 'AI';
+    av.textContent = role === 'user' ? 'Vous' : 'AI';
     const bub = document.createElement('div');
     bub.className = 'bubble';
     bub.textContent = text;
+    if (imageData && role === 'user') {
+      const img = document.createElement('img');
+      img.src = 'data:image/jpeg;base64,' + imageData;
+      bub.appendChild(document.createElement('br'));
+      bub.appendChild(img);
+    }
     wrap.appendChild(av);
     wrap.appendChild(bub);
     messagesEl.appendChild(wrap);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
+
   function showTyping() {
     const wrap = document.createElement('div');
     wrap.className = 'msg bot';
@@ -100,16 +141,19 @@
     messagesEl.appendChild(wrap);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
+
   async function sendMessage() {
     const text = inputEl.value.trim();
-    if (!text) return;
+    if (!text && !currentFile) return;
     inputEl.value = '';
     sendBtn.disabled = true;
-    addMessage('user', text);
-    history.push({ role: 'user', content: text });
+    const isImage = currentFileType && currentFileType.startsWith('image/');
+    addMessage('user', text || '📎 Fichier envoyé', isImage ? currentFile : null);
+    history.push({ role: 'user', content: text || 'Analyse ce fichier' });
     showTyping();
     try {
-      const res = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history }) });
+      const body = { messages: history, file: currentFile, file_type: currentFileType };
+      const res = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const data = await res.json();
       document.getElementById('typing')?.remove();
       const reply = data.reply || data.error || 'Erreur inconnue.';
@@ -119,10 +163,11 @@
       document.getElementById('typing')?.remove();
       addMessage('bot', 'Erreur de connexion au serveur.');
     }
+    clearFile();
     sendBtn.disabled = false;
     inputEl.focus();
   }
-  sendBtn.addEventListener('click', sendMessage);
+
   inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
   inputEl.addEventListener('input', () => { inputEl.style.height = 'auto'; inputEl.style.height = inputEl.scrollHeight + 'px'; });
 </script>
