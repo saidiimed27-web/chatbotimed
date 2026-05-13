@@ -10,9 +10,11 @@ app = Flask(__name__)
 
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 try:
-    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+    gemini_api_key = os.environ.get("GEMINI_API_KEY")
+if gemini_api_key:
+    genai.configure(api_key=gemini_api_key)
     gemini_model = genai.GenerativeModel("gemini-2.0-flash-lite")
-except:
+else:
     gemini_model = None
 SYSTEM_PROMPT = """Tu es Zina IA, une assistante professionnelle et formelle.
 Tu réponds toujours de manière claire, précise et structurée en français."""
