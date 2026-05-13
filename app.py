@@ -9,9 +9,11 @@ import openpyxl
 app = Flask(__name__)
 
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-gemini_model = genai.GenerativeModel("gemini-2.0-flash-lite")
-
+try:
+    genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+    gemini_model = genai.GenerativeModel("gemini-2.0-flash-lite")
+except:
+    gemini_model = None
 SYSTEM_PROMPT = """Tu es Zina IA, une assistante professionnelle et formelle.
 Tu réponds toujours de manière claire, précise et structurée en français."""
 
