@@ -9,13 +9,14 @@ import openpyxl
 app = Flask(__name__)
 
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-try:
-    gemini_api_key = os.environ.get("GEMINI_API_KEY")
+
+gemini_api_key = os.environ.get("GEMINI_API_KEY")
 if gemini_api_key:
     genai.configure(api_key=gemini_api_key)
     gemini_model = genai.GenerativeModel("gemini-2.0-flash-lite")
 else:
     gemini_model = None
+
 SYSTEM_PROMPT = """Tu es Zina IA, une assistante professionnelle et formelle.
 Tu réponds toujours de manière claire, précise et structurée en français."""
 
@@ -35,7 +36,7 @@ def chat():
     file_type = data.get("file_type", None)
 
     try:
-        if file_data and file_type:
+        if file_data and file_type and gemini_model:
             parts = [SYSTEM_PROMPT]
             if file_type.startswith("image/"):
                 parts.append({"mime_type": file_type, "data": file_data})
@@ -53,18 +54,6 @@ def chat():
                 for page in reader.pages:
                     text += page.extract_text()
                 parts.append(f"Contenu du PDF:\n{text}")
-                if messages:
-                    parts.append(messages[-1]["content"])
-                response = gemini_model.generate_content(parts)
-                return jsonify({"reply": response.text})
-            elif "word" in file_type or "document" in file_type:
-                docx_bytes = base64.b64decode(file_data)
-                with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as f:
-                    f.write(docx_bytes)
-                    tmp_path = f.name
-                doc = Document(tmp_path)
-                text = "\n".join([p.text for p in doc.paragraphs])
-                parts.append(f"Contenu du document:\n{text}")
                 if messages:
                     parts.append(messages[-1]["content"])
                 response = gemini_model.generate_content(parts)
