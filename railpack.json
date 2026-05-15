@@ -2,5 +2,5 @@
   "provider": "python",
   "install": "pip install -r requirements.txt",
   "build": "",
-  "start": "python app.py"
+  "start": "gunicorn app:app --bind 0.0.0.0:$PORT"
 }
