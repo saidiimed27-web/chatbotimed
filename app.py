@@ -1,21 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 from groq import Groq
-import google.generativeai as genai
-import os, base64, tempfile
-import PyPDF2
-from docx import Document
-import openpyxl
+import os
 
 app = Flask(__name__)
 
-groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-
-gemini_api_key = os.environ.get("GEMINI_API_KEY")
-if gemini_api_key:
-    genai.configure(api_key=gemini_api_key)
-    gemini_model = genai.GenerativeModel("gemini-2.0-flash-lite")
-else:
-    gemini_model = None
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 SYSTEM_PROMPT = """Tu es Zina IA, une assistante professionnelle et formelle.
 Tu réponds toujours de manière claire, précise et structurée en français."""
@@ -32,40 +21,16 @@ def manifest():
 def chat():
     data = request.get_json()
     messages = data.get("messages", [])
-    file_data = data.get("file", None)
-    file_type = data.get("file_type", None)
-
+    if not messages:
+        return jsonify({"error": "Aucun message fourni"}), 400
     try:
-        if file_data and file_type and gemini_model:
-            parts = [SYSTEM_PROMPT]
-            if file_type.startswith("image/"):
-                parts.append({"mime_type": file_type, "data": file_data})
-                if messages:
-                    parts.append(messages[-1]["content"])
-                response = gemini_model.generate_content(parts)
-                return jsonify({"reply": response.text})
-            elif file_type == "application/pdf":
-                pdf_bytes = base64.b64decode(file_data)
-                with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as f:
-                    f.write(pdf_bytes)
-                    tmp_path = f.name
-                reader = PyPDF2.PdfReader(tmp_path)
-                text = ""
-                for page in reader.pages:
-                    text += page.extract_text()
-                parts.append(f"Contenu du PDF:\n{text}")
-                if messages:
-                    parts.append(messages[-1]["content"])
-                response = gemini_model.generate_content(parts)
-                return jsonify({"reply": response.text})
-
-        response = groq_client.chat.completions.create(
+        response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "system", "content": SYSTEM_PROMPT}] + messages,
             max_tokens=1024,
         )
-        return jsonify({"reply": response.choices[0].message.content})
-
+        reply = response.choices[0].message.content
+        return jsonify({"reply": reply})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
