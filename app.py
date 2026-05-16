@@ -28,7 +28,7 @@ def chat():
     file_type = data.get("file_type", None)
 
     try:
-        if file_data and file_type and file_type.startswith("image/"):
+        if file_data and file_type:
             parts = [SYSTEM_PROMPT]
             parts.append({"mime_type": file_type, "data": file_data})
             if messages:
