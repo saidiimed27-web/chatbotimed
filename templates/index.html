@@ -155,8 +155,8 @@
     inputEl.focus();
   }
 
-  sendBtn.addEventListener('click', sendMessage);
-  inputEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+ sendBtn.addEventListener('click', function() { sendMessage(); });
+  inputEl.addEventListener('keydown', function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
   inputEl.addEventListener('input', () => { inputEl.style.height = 'auto'; inputEl.style.height = inputEl.scrollHeight + 'px'; });
 </script>
 </body>
