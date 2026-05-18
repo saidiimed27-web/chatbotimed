@@ -77,7 +77,7 @@
 var messagesEl = document.getElementById("messages");
 var inputEl = document.getElementById("user-input");
 var sendBtn = document.getElementById("send-btn");
-var history = [];
+var chatHistory = [];
 var currentFile = null;
 var currentFileType = null;
 
@@ -138,9 +138,9 @@ function sendMessage() {
   inputEl.value = "";
   sendBtn.disabled = true;
   addMessage("user", text || "Image envoyee");
-  history.push({ role: "user", content: text || "Analyse cette image" });
+  chatHistory.push({ role: "user", content: text || "Analyse cette image" });
   showTyping();
-  var body = { messages: history, file: currentFile, file_type: currentFileType };
+  var body = { messages: chatHistory, file: currentFile, file_type: currentFileType };
   fetch("/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -152,7 +152,7 @@ function sendMessage() {
     if (typing) typing.remove();
     var reply = data.reply || data.error || "Erreur inconnue.";
     addMessage("bot", reply);
-    if (data.reply) history.push({ role: "assistant", content: reply });
+    if (data.reply) chatHistory.push({ role: "assistant", content: reply });
   }).catch(function() {
     var typing = document.getElementById("typing");
     if (typing) typing.remove();

@@ -77,7 +77,7 @@ html = '''<!DOCTYPE html>
 var messagesEl = document.getElementById("messages");
 var inputEl = document.getElementById("user-input");
 var sendBtn = document.getElementById("send-btn");
-var history = [];
+var chatHistory = [];
 var currentFile = null;
 var currentFileType = null;
 
