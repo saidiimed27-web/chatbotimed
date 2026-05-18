@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+html = '''<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -125,7 +125,7 @@ function showTyping() {
   av.textContent = "AI";
   var bub = document.createElement("div");
   bub.className = "bubble";
-  bub.innerHTML = "<div class=\"typing-dots\"><span></span><span></span><span></span></div>";
+  bub.innerHTML = "<div class=\\"typing-dots\\"><span></span><span></span><span></span></div>";
   wrap.appendChild(av);
   wrap.appendChild(bub);
   messagesEl.appendChild(wrap);
@@ -177,4 +177,8 @@ inputEl.addEventListener("input", function() {
 });
 </script>
 </body>
-</html>
+</html>'''
+
+with open('templates/index.html', 'w', encoding='utf-8') as f:
+    f.write(html)
+print("OK!")
