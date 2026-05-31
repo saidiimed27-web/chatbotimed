@@ -518,7 +518,7 @@ function sendMessage() {
   inputEl.value = "";
   inputEl.style.height = "auto";
   sendBtn.disabled = true;
-  addMessage("user", text || "", imgToShow);
+  addMessage("user", text || "");
   history.push({ role: "user", content: text || "Analyse cette image" });
   showTyping();
   var body = { messages: history, file: currentFile, file_type: currentFileType };
