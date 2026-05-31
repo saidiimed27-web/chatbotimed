@@ -283,10 +283,49 @@
     #send-btn svg { width: 16px; height: 16px; }
     #send-btn:disabled svg { opacity: 0.3; }
     #input-hint { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 8px; font-weight: 300; }
+    #menu-btn {
+      display: none;
+      width: 30px; height: 30px; border-radius: 6px;
+      background: none; border: 1px solid var(--border);
+      color: var(--text-muted); cursor: pointer;
+      align-items: center; justify-content: center;
+      font-size: 16px; transition: all 0.15s;
+    }
+    #menu-btn:hover { background: var(--surface); color: var(--text); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      #sidebar { display: none; }
+      #sidebar.open {
+        display: flex;
+        position: fixed;
+        top: 0; left: 0;
+        height: 100vh;
+        z-index: 999;
+        width: 260px;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+      }
+      #overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 998;
+      }
+      #overlay.show { display: block; }
+      #topbar { padding: 0 14px; }
+      #menu-btn { display: flex !important; }
+      #welcome h1 { font-size: 26px; }
+      .suggestion-grid { grid-template-columns: 1fr; max-width: 100%; }
+      #messages { padding: 20px 0; }
+      .msg-row { padding: 0 14px 18px; }
+      #input-wrapper { padding: 0 12px 14px; }
+    }
   </style>
 </head>
 <body>
 
+<div id="overlay" onclick="closeSidebar()"></div>
 <!-- SIDEBAR -->
 <div id="sidebar">
   <div id="sidebar-logo">
@@ -310,7 +349,7 @@
 <!-- MAIN -->
 <div id="main">
   <!-- TOP BAR -->
-  <div id="topbar">
+  <div id="topbar"><button id="menu-btn" onclick="toggleSidebar()">&#9776;</button>
     <div class="model-badge">
       <span class="dot"></span>
       Zina IA · Gemini Vision
@@ -515,6 +554,15 @@ inputEl.addEventListener("input", function() {
   this.style.height = "auto";
   this.style.height = Math.min(this.scrollHeight, 180) + "px";
 });
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
 </script>
 </body>
 </html>
