@@ -462,7 +462,7 @@ function useSuggestion(el) {
   inputEl.focus();
 }
 
-function addMessage(role, text, imgBase64) {
+function addMessage(role, text, imgBase64, imgType) {
   if (welcome && welcome.parentNode) welcome.remove();
 
   var row = document.createElement("div");
@@ -484,7 +484,7 @@ function addMessage(role, text, imgBase64) {
 
   if (imgBase64) {
     var img = document.createElement("img");
-    img.src = "data:image/jpeg;base64," + imgBase64;
+   img.src = "data:" + (imgType || "image/jpeg") + ";base64," + imgBase64;
     img.style.cssText = "max-width:260px;border-radius:10px;display:block;margin-bottom:6px;border:1px solid rgba(255,255,255,0.1)";
     bub.appendChild(img);
   }
@@ -518,7 +518,7 @@ function sendMessage() {
   inputEl.value = "";
   inputEl.style.height = "auto";
   sendBtn.disabled = true;
-  addMessage("user", text || "");
+  addMessage("user", text || "", imgToShow, currentFileType);
   history.push({ role: "user", content: text || "Analyse cette image" });
   showTyping();
   var body = { messages: history, file: currentFile, file_type: currentFileType };
